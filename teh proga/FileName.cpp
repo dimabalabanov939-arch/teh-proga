@@ -86,7 +86,8 @@ void TapeSort(books book[], int N)
 }
 void randfam(char *fam)
 {
-	const char* famel[] = {
+	const char* famel[] = 
+	{
 	"Иванов", "Петров", "Сидоров", "Смирнов", "Кузнецов",
 	"Попов", "Васильев", "Павлов", "Семенов", "Голубев",
 	"Виноградов", "Богданов", "Воробьев", "Федоров", "Михайлов",
@@ -100,12 +101,13 @@ void randfam(char *fam)
 }
 void randname(char* book)
 {
-	const char* books[] = {
+	const char* books[] = 
+	{
 		"Война и мир", "Преступление и наказание", "Мастер и Маргарита",
 		"Анна Каренина", "Идиот", "Тихий Дон", "Герой нашего времени",
 		"Мертвые души", "Отцы и дети", "Обломов", "Евгений Онегин",
 		"Горе от ума", "Ревизор", "Вишневый сад", "На дне",
-		"Три товарища", "Сто лет одиночества", "1984", "Улисс",
+		"Три товарища", "Сто лет одиночества", "Золотая рыбка", "Улисс",
 		"Великий Гэтсби", "Над пропастью во ржи", "Портрет Дориана Грея",
 		"Собор Парижской Богоматери", "Отверженные", "Дон Кихот",
 		"Декамерон", "Гаргантюа и Пантагрюэль", "Фауст", "Божественная комедия",
@@ -115,30 +117,76 @@ void randname(char* book)
 	int b = rand() % 30;
 	strcpy_s(book, 100, books[b]);
 }
+void menu1(books *book, int n)
+{
+	cout << "\nДо сортировки:\n";
+	for (int i = 0; i < n; i++)
+	{
+		cout << book[i].num << " | " << book[i].famavt << " | '" << book[i].name << "' " << endl;
+	}
+	TapeSort(book, n);
+
+	cout << "\nПосле сортировки по названию книги:\n";
+	for (int i = 0; i < n; i++)
+	{
+		cout << book[i].num << " | " << book[i].famavt << " | '" << book[i].name << "'" << endl;
+	}
+}
+void menu2(books book, int n)
+{
+
+}
+void menu(books book, int n)
+{
+	while (1)
+	{
+		cout << endl << "======================================" << endl;
+		cout << "                МЕНЮ                  " << endl;
+		cout << "1. Сортировка" << endl;
+		cout << "2. Поиск" << endl;
+		cout << "3. Выход" << endl;
+		cout << "Введите номер действия: " << endl;
+		int k;
+		cin >> k;
+		if (cin.fail()) 
+		{
+			cout << "Ошибка ввода! Необходимо ввести число." << endl;
+			cin.clear(); 
+			cin.ignore(10000000, '\n'); 
+			
+		}
+		else 
+		{
+			cin.ignore(10000000, '\n'); 
+		}
+		switch (k)
+		{
+		case 1:
+			menu1(&book, n);
+			break;
+		case 2:
+			menu2(book, n);
+			break;
+		case 3:
+			exit(0);
+		}
+	}
+}
 int main()
 {
 	setlocale(LC_ALL, "Russian");
 	srand(time(0));
 
-	const int n = 10;
-	books book[n];
+	int n;
+	cout << "Введите количество элементов для массива";
+	cin >> n;
+	books *book = new books[n];
 	for (int i = 0; i < n; i++)
 	{
 		randfam(book[i].famavt);
 		book[i].num = rand();
 		randname(book[i].name);
 	}
-	cout << "До сортировки:\n";
-	for (int i = 0; i < n; i++) 
-	{
-		cout << book[i].num << " | " << book[i].famavt << " | '" << book[i].name << "' " <<  endl;
-	}
-	TapeSort(book, n);
-
-	cout << "\nПосле сортировки по названию книги:\n";
-	for (int i = 0; i < n; i++) 
-	{
-		cout << book[i].num << " | " << book[i].famavt << " | '" << book[i].name << "'" << endl;
-	}
+	menu(*book, n);
 	return 0;
 }
