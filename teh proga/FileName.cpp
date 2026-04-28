@@ -19,7 +19,7 @@ void SelectionSort(books book[], int N)
 
 		for (int j = i + 1; j < N; j++)
 		{
-			if (strcmp(book[j].name, book[minIndex].name) < 0)
+			if (book[j].num < book[minIndex].num)
 			{
 				minIndex = j;
 			}
@@ -57,7 +57,7 @@ void TapeSort(books book[], int N)
 			if (Sizes[i] > 0)
 			{
 				if (minTape == -1 ||
-					strcmp(Tapes[i][0].name, Tapes[minTape][0].name) < 0)
+					Tapes[i][0].num < Tapes[minTape][0].num)
 				{
 					minTape = i;
 				}
@@ -84,40 +84,35 @@ void TapeSort(books book[], int N)
 	delete[] Tapes;
 	delete[] Sizes;
 }
-int BinarySearchExact(books book[], int left, int right, const char* searchTitle)
+int BinarySearchExact(books book[], int left, int right, int searchNum)
 {
 	while (left <= right)
 	{
 		int mid = left + (right - left) / 2;
-		int cmp = strcmp(book[mid].name, searchTitle);
 
-		if (cmp == 0)
-			return mid;  // Найдено точное совпадение
-		else if (cmp < 0)
-			left = mid + 1;  // Искомое название больше, ищем в правой половине
+		if (searchNum == book[mid].num)
+			return mid;  
+		else if (searchNum > book[mid].num)
+			left = mid + 1;
 		else
-			right = mid - 1;  // Искомое название меньше, ищем в левой половине
+			right = mid - 1;
 	}
 
-	return -1;  // Элемент не найден
+	return -1;
 }
-int FindFirstOccurrence(books book[], int N, const char* searchTitle)
+int FindFirstOccurrence(books book[], int left, int right, int a)
 {
-	int left = 0, right = N - 1;
 	int result = -1;
-
 	while (left <= right)
 	{
 		int mid = left + (right - left) / 2;
-		int cmp = strcmp(book[mid].name, searchTitle);
 
-		if (cmp >= 0)  // Название книги >= искомого
+		if (book[mid].num >= a)
 		{
-			if (cmp == 0)
-				result = mid;  // Запоминаем позицию
-			right = mid - 1;  // Продолжаем искать в левой части
+			result = mid;
+			right = mid - 1;
 		}
-		else  // cmp < 0
+		else
 		{
 			left = mid + 1;
 		}
@@ -125,23 +120,20 @@ int FindFirstOccurrence(books book[], int N, const char* searchTitle)
 
 	return result;
 }
-int FindLastOccurrence(books book[], int N, const char* searchTitle)
+int FindLastOccurrence(books book[], int left, int right, int b)
 {
-	int left = 0, right = N - 1;
 	int result = -1;
 
 	while (left <= right)
 	{
 		int mid = left + (right - left) / 2;
-		int cmp = strcmp(book[mid].name, searchTitle);
 
-		if (cmp <= 0)  // Название книги <= искомого
+		if (book[mid].num <= b)
 		{
-			if (cmp == 0)
-				result = mid;  // Запоминаем позицию
-			left = mid + 1;  // Продолжаем искать в правой части
+			result = mid;
+			left = mid + 1;
 		}
-		else  // cmp > 0
+		else
 		{
 			right = mid - 1;
 		}
@@ -149,26 +141,26 @@ int FindLastOccurrence(books book[], int N, const char* searchTitle)
 
 	return result;
 }
-void BinarySearchRange(books book[], int N, const char* searchTitle)
+void BinarySearchRange(books book[], int N, int a, int b)
 {
-	// Находим первое и последнее вхождение искомого названия
-	int first = FindFirstOccurrence(book, N, searchTitle);
+	int first = FindFirstOccurrence(book, 0, N - 1, a);
 
-	if (first == -1)
+	
+
+	int last = FindLastOccurrence(book, 0, N - 1, b);
+	if (first == -1 || last == -1 || first > last)
 	{
-		cout << "No books found with title containing '" << searchTitle << "'" << endl;
+		cout << "No books found with range " << a << " and " << b << "." << endl;
 		return;
 	}
 
-	int last = FindLastOccurrence(book, N, searchTitle);
-
-	cout << "\nFound " << (last - first + 1) << " book(s) with title containing '" << searchTitle << "':" << endl;
+	cout << "\nFound " << (last - first + 1) << " book(s) in the range of num:"<< endl;
 	for (int i = first; i <= last; i++)
 	{
-		cout << book[i].num << " | " << book[i].famavt << " | '" << book[i].name << "'" << endl;
+		cout << book[i].num << " | " << book[i].famavt << " | " << book[i].name << endl;
 	}
 }
-void randfam(char* fam)
+void randfam(char* fam, char* book)
 {
 	const char* famel[] =
 	{
@@ -179,12 +171,6 @@ void randfam(char* fam)
 	"Kiselev", "Makarov", "Andreev", "Kovalev", "Ilyin",
 	"Gusev", "Titov", "Kuzmin", "Krylov", "Baranov"
 	};
-
-	int f = rand() % 30;
-	strcpy_s(fam, 100, famel[f]);
-}
-void randname(char* book)
-{
 	const char* books[] =
 	{
 		"War and Peace", "Crime and Punishment", "The Master and Margarita",
@@ -198,8 +184,9 @@ void randname(char* book)
 		"One Thousand and One Nights"
 	};
 
-	int b = rand() % 30;
-	strcpy_s(book, 100, books[b]);
+	int f = rand() % 30;
+	strcpy_s(fam, 100, famel[f]);
+	strcpy_s(book, 100, books[f]);
 }
 void menu1(books* book, int n)
 {
@@ -210,7 +197,7 @@ void menu1(books* book, int n)
 	}
 	TapeSort(book, n);
 
-	cout << "\nAfter sorting by book title:\n";
+	cout << "\nAfter sorting by book num:\n";
 	for (int i = 0; i < n; i++)
 	{
 		cout << book[i].num << " | " << book[i].famavt << " | '" << book[i].name << "'" << endl;
@@ -232,16 +219,23 @@ void menu2(books book[], int n)
 		}
 		cin.ignore(10000000, '\n');
 
-		char searchTitle[100];
+		int searchNum;
 
 		switch (k)
 		{
 		case 1:
 		{
-			cout << "Enter book title to search for: ";
-			cin.getline(searchTitle, 100);
+			cout << "Enter book num to search for: ";
+			cin >> searchNum;
+			if (cin.fail())
+			{
+				cout << "Input error! Please enter a number." << endl;
+				cin.clear();
+				cin.ignore(10000000, '\n');
+			}
+			cin.ignore(10000000, '\n');
 
-			int result = BinarySearchExact(book, 0, n - 1, searchTitle);
+			int result = BinarySearchExact(book, 0, n - 1, searchNum);
 
 			if (result != -1)
 			{
@@ -250,15 +244,55 @@ void menu2(books book[], int n)
 			}
 			else
 			{
-				cout << "Book with title '" << searchTitle << "' not found." << endl;
+				cout << "Book with num '" << searchNum << "' not found." << endl;
 			}
 			break;
 		}
 		case 2:
 		{
-			cout << "Enter book title to search for (partial match): ";
-			cin.getline(searchTitle, 100);
-			BinarySearchRange(book, n, searchTitle);
+			cout << "Enter the range of num to search for a book: ";
+			int a, b;
+			cout << "Enter the first member of the range: ";
+			cin >> a;
+			if (cin.fail())
+			{
+				cout << "Input error! Please enter a number." << endl;
+				cin.clear();
+				cin.ignore(10000000, '\n');
+			}
+			cin.ignore(10000000, '\n');
+			cout << "Enter the second member of the range: ";
+			cin >> b;
+			if (cin.fail())
+			{
+				cout << "Input error! Please enter a number." << endl;
+				cin.clear();
+				cin.ignore(10000000, '\n');
+			}
+			cin.ignore(10000000, '\n');
+			while (a < 0 || b < 0 || b < a)
+			{
+				cout << "Error! The first number of the range must be less than the second, and both the start and the end of the range must be greater than zero." << endl;
+				cout << "Enter the first member of the range: ";
+				cin >> a;
+				if (cin.fail())
+				{
+					cout << "Input error! Please enter a number." << endl;
+					cin.clear();
+					cin.ignore(10000000, '\n');
+				}
+				cin.ignore(10000000, '\n');
+				cout << "Enter the second member of the range: ";
+				cin >> b;
+				if (cin.fail())
+				{
+					cout << "Input error! Please enter a number." << endl;
+					cin.clear();
+					cin.ignore(10000000, '\n');
+				}
+				cin.ignore(10000000, '\n');
+			}
+			BinarySearchRange(book, n, a, b);
 			break;
 		}
 		default:
@@ -314,9 +348,8 @@ int main()
 	books* book = new books[n];
 	for (int i = 0; i < n; i++)
 	{
-		randfam(book[i].famavt);
+		randfam(book[i].famavt, book[i].name);
 		book[i].num = rand() % 10000;
-		randname(book[i].name);
 	}
 	menu(book, n);
 	return 0;
