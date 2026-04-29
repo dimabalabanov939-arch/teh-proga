@@ -8,7 +8,7 @@ using namespace std;
 struct books {
 	char famavt[100];
 	char name[100];
-	unsigned int num;
+	int num;
 };
 
 void SelectionSort(books book[], int N)
@@ -84,22 +84,6 @@ void TapeSort(books book[], int N)
 	delete[] Tapes;
 	delete[] Sizes;
 }
-int BinarySearchExact(books book[], int left, int right, int searchNum)
-{
-	while (left <= right)
-	{
-		int mid = left + (right - left) / 2;
-
-		if (searchNum == book[mid].num)
-			return mid;  
-		else if (searchNum > book[mid].num)
-			left = mid + 1;
-		else
-			right = mid - 1;
-	}
-
-	return -1;
-}
 int FindFirstOccurrence(books book[], int left, int right, int a)
 {
 	int result = -1;
@@ -141,11 +125,31 @@ int FindLastOccurrence(books book[], int left, int right, int b)
 
 	return result;
 }
+int* BinarySearchExact(books book[], int left, int right, int searchNum, int& foundCount)
+{
+	int first = FindFirstOccurrence(book, left, right, searchNum);
+
+	if (first == -1) {
+		foundCount = 0;
+		int* arr = new int[1];
+		arr[0] = -1;
+		return arr;
+	}
+
+	int last = FindLastOccurrence(book, left, right, searchNum);
+	foundCount = last - first + 1;
+
+	int* arr = new int[foundCount];
+	for (int i = 0; i < foundCount; i++) {
+		arr[i] = first + i;
+	}
+
+	return arr;
+}
+
 void BinarySearchRange(books book[], int N, int a, int b)
 {
 	int first = FindFirstOccurrence(book, 0, N - 1, a);
-
-	
 
 	int last = FindLastOccurrence(book, 0, N - 1, b);
 	if (first == -1 || last == -1 || first > last)
@@ -154,7 +158,7 @@ void BinarySearchRange(books book[], int N, int a, int b)
 		return;
 	}
 
-	cout << "\nFound " << (last - first + 1) << " book(s) in the range of num:"<< endl;
+	cout << "\nFound " << (last - first + 1) << " book(s) in the range of num:" << endl;
 	for (int i = first; i <= last; i++)
 	{
 		cout << book[i].num << " | " << book[i].famavt << " | " << book[i].name << endl;
@@ -205,12 +209,28 @@ void menu1(books* book, int n)
 }
 void menu2(books book[], int n)
 {
-		cout << "\n=== SEARCH MENU ===" << endl;
-		cout << "1. Single-aspect exact match search" << endl;
-		cout << "2. Single-aspect range search" << endl;
-		cout << "Enter action number: " << endl;
-		int k;
-		cin >> k;
+	cout << "\n=== SEARCH MENU ===" << endl;
+	cout << "1. Single-aspect exact match search" << endl;
+	cout << "2. Single-aspect range search" << endl;
+	cout << "Enter action number: " << endl;
+	int k;
+	cin >> k;
+	if (cin.fail())
+	{
+		cout << "Input error! Please enter a number." << endl;
+		cin.clear();
+		cin.ignore(10000000, '\n');
+	}
+	cin.ignore(10000000, '\n');
+
+	int searchNum;
+
+	switch (k)
+	{
+	case 1:
+	{
+		cout << "Enter book num to search for: ";
+		cin >> searchNum;
 		if (cin.fail())
 		{
 			cout << "Input error! Please enter a number." << endl;
@@ -219,39 +239,48 @@ void menu2(books book[], int n)
 		}
 		cin.ignore(10000000, '\n');
 
-		int searchNum;
+		int foundCount = 0;
+		int* result = BinarySearchExact(book, 0, n - 1, searchNum, foundCount);
 
-		switch (k)
+		if (result[0] != -1)
 		{
-		case 1:
-		{
-			cout << "Enter book num to search for: ";
-			cin >> searchNum;
-			if (cin.fail())
+			cout << "\nBook(s) found!" << endl;
+			for (int i = 0; i < foundCount; i++)
 			{
-				cout << "Input error! Please enter a number." << endl;
-				cin.clear();
-				cin.ignore(10000000, '\n');
+				cout << book[result[i]].num << " | " << book[result[i]].famavt << " | '" << book[result[i]].name << "'" << endl;
 			}
-			cin.ignore(10000000, '\n');
-
-			int result = BinarySearchExact(book, 0, n - 1, searchNum);
-
-			if (result != -1)
-			{
-				cout << "\nBook found!" << endl;
-				cout << book[result].num << " | " << book[result].famavt << " | '" << book[result].name << "'" << endl;
-			}
-			else
-			{
-				cout << "Book with num '" << searchNum << "' not found." << endl;
-			}
-			break;
 		}
-		case 2:
+		else
 		{
-			cout << "Enter the range of num to search for a book: ";
-			int a, b;
+			cout << "Book with num '" << searchNum << "' not found." << endl;
+		}
+		break;
+	}
+	case 2:
+	{
+		cout << "Enter the range of num to search for a book: ";
+		int a, b;
+		cout << "Enter the first num of the range: ";
+		cin >> a;
+		if (cin.fail())
+		{
+			cout << "Input error! Please enter a number." << endl;
+			cin.clear();
+			cin.ignore(10000000, '\n');
+		}
+		cin.ignore(10000000, '\n');
+		cout << "Enter the second num of the range: ";
+		cin >> b;
+		if (cin.fail())
+		{
+			cout << "Input error! Please enter a number." << endl;
+			cin.clear();
+			cin.ignore(10000000, '\n');
+		}
+		cin.ignore(10000000, '\n');
+		while (a < 0 || b < 0 || b < a)
+		{
+			cout << "Error! The first number of the range must be less than the second, and both the start and the end of the range must be greater than zero." << endl;
 			cout << "Enter the first member of the range: ";
 			cin >> a;
 			if (cin.fail())
@@ -270,34 +299,13 @@ void menu2(books book[], int n)
 				cin.ignore(10000000, '\n');
 			}
 			cin.ignore(10000000, '\n');
-			while (a < 0 || b < 0 || b < a)
-			{
-				cout << "Error! The first number of the range must be less than the second, and both the start and the end of the range must be greater than zero." << endl;
-				cout << "Enter the first member of the range: ";
-				cin >> a;
-				if (cin.fail())
-				{
-					cout << "Input error! Please enter a number." << endl;
-					cin.clear();
-					cin.ignore(10000000, '\n');
-				}
-				cin.ignore(10000000, '\n');
-				cout << "Enter the second member of the range: ";
-				cin >> b;
-				if (cin.fail())
-				{
-					cout << "Input error! Please enter a number." << endl;
-					cin.clear();
-					cin.ignore(10000000, '\n');
-				}
-				cin.ignore(10000000, '\n');
-			}
-			BinarySearchRange(book, n, a, b);
-			break;
 		}
-		default:
-			cout << "Invalid choice! Please enter 1 or 2." << endl;
-		}
+		BinarySearchRange(book, n, a, b);
+		break;
+	}
+	default:
+		cout << "Invalid choice! Please enter 1 or 2." << endl;
+	}
 }
 void menu(books book[], int n)
 {
@@ -349,7 +357,7 @@ int main()
 	for (int i = 0; i < n; i++)
 	{
 		randfam(book[i].famavt, book[i].name);
-		book[i].num = rand() % 10000;
+		book[i].num = rand() % 10;
 	}
 	menu(book, n);
 	return 0;
